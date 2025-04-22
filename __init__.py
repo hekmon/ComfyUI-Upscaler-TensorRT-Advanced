@@ -54,6 +54,10 @@ class UpscalerTensorRT:
             raise ValueError(f"The input image height ({H}) is lower than the TensorRT engine minimum height ({options.height_min}). Please set options to the loader accordingly.")
         if H > options.height_max:
             raise ValueError(f"The input image height ({H}) is greater than the TensorRT engine maximum height ({options.height_max}). Please set options to the loader accordingly.")
+        if B < options.batch_min:
+            raise ValueError(f"The input batch size ({B}) is lower than the TensorRT engine minimum batch ({options.batch_min}). Please set options to the loader accordingly.")
+        if B > options.batch_max:
+            raise ValueError(f"The input batch size ({B}) is greater than the TensorRT engine maximum batch ({options.batch_max}). Please set options to the loader accordingly.")
 
         if resize is None:
             final_width, final_height = W*4, H*4
@@ -111,11 +115,11 @@ class UpscalerTensorrtResize:
             "required": {
                 "width": (
                     "INT",
-                    {"default": 1920, "min": 1}
+                    {"default": 2560, "min": 1}
                 ),
                 "height": (
                     "INT",
-                    {"default": 1080, "min": 1}
+                    {"default": 1440, "min": 1}
                 ),
             },
         }
@@ -185,7 +189,7 @@ class LoadUpscalerTensorrtModel:
                 ),
             }
         }
-    RETURN_NAMES = ("engine",)
+    RETURN_NAMES = ("ENGINE",)
     RETURN_TYPES = ("UPSCALER_TRT_MODEL",)
     CATEGORY = "TensorRT/Upscaler"
     DESCRIPTION = "Load TensorRT model (the model will be built automatically if not found)"
@@ -304,19 +308,7 @@ class EngineBuildOptionsNode:
     FUNCTION = "package"
 
     @classmethod
-    def VALIDATE_INPUTS(cls, input_types):
-        if input_types["width_opt"] < input_types["width_min"]:
-            return "width_opt must be greater than or equal to width_min"
-        if input_types["width_opt"] > input_types["width_max"]:
-            return "width_opt must be less than or equal to width_max"
-        if input_types["height_opt"] < input_types["height_min"]:
-            return "height_opt must be greater than or equal to height_min"
-        if input_types["height_opt"] > input_types["height_max"]:
-            return "height_opt must be less than or equal to height_max"
-        if input_types["batch_opt"] < input_types["batch_min"]:
-            return "batch_opt must be greater than or equal to batch_min"
-        if input_types["batch_opt"] > input_types["batch_max"]:
-            return "batch_opt must be less than or equal to batch_max"
+    def VALIDATE_INPUTS(cls, width_min, width_opt, width_max, height_min, height_opt, height_max, batch_min, batch_opt, batch_max):
         return True
 
     def package(self, width_min, width_opt, width_max, height_min, height_opt, height_max, batch_min, batch_opt, batch_max):
