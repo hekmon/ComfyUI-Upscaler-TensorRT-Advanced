@@ -4,7 +4,7 @@ import numpy as np
 import torch
 from comfy.utils import ProgressBar
 from .trt_utilities import Engine
-from .utilities import download_file, ColoredLogger, get_final_resolutions
+from .utilities import download_file, ColoredLogger
 import comfy.model_management as mm
 import time
 import tensorrt
