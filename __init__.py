@@ -12,18 +12,18 @@ import tensorrt
 logger = ColoredLogger("ComfyUI-Upscaler-Tensorrt")
 
 
-class UpscalerTensorrt:
+class UpscalerTensorRT:
     @classmethod
     def INPUT_TYPES(s):
         return {
             "required": {
-                "images": (
+                "image": (
                     "IMAGE",
-                    {"tooltip": "Images to be upscaled. Resolution must be between 256 and 1280 px"}
+                    {"tooltip": "Images to be upscaled. Resolution must be between 256 and 1280 px if no build options has been specified."}
                 ),
-                "upscaler_trt_model": (
+                "engine": (
                     "UPSCALER_TRT_MODEL",
-                    {"tooltip": "Tensorrt model built and loaded"}
+                    {"tooltip": "TensorRT engine built and loaded"}
                 ),
             },
             "optional": {
@@ -39,10 +39,26 @@ class UpscalerTensorrt:
     CATEGORY = "TensorRT/Upscaler"
     DESCRIPTION = "Upscale images with TensorRT"
 
-    def upscaler_tensorrt(self, images, upscaler_trt_model, resize=None):
-        images_bchw = images.permute(0, 3, 1, 2)
+    def upscaler_tensorrt(self, image, engine, resize=None):
+        options = engine["options"]
+        engine = engine["engine"]
+
+        images_bchw = image.permute(0, 3, 1, 2)
         B, C, H, W = images_bchw.shape
-        final_width, final_height = W*4, H*4 if resize is None else resize["width"], resize["height"]
+
+        if W < options.width_min:
+            raise ValueError(f"The input image width ({W}) is lower than the TensorRT engine minimum width ({options.width_min}). Please set options to the loader accordingly.")
+        if W > options.width_max:
+            raise ValueError(f"The input image width ({W}) is greater than the TensorRT engine maximum width ({options.width_max}). Please set options to the loader accordingly.")
+        if H < options.height_min:
+            raise ValueError(f"The input image height ({H}) is lower than the TensorRT engine minimum height ({options.height_min}). Please set options to the loader accordingly.")
+        if H > options.height_max:
+            raise ValueError(f"The input image height ({H}) is greater than the TensorRT engine maximum height ({options.height_max}). Please set options to the loader accordingly.")
+
+        if resize is None:
+            final_width, final_height = W*4, H*4
+        else:
+            final_width, final_height = resize["width"], resize["height"]
         logger.info(f"Upscaling {B} images from H:{H}, W:{W} to H:{H*4}, W:{W*4} | Final resolution: H:{final_height}, W:{final_width}")
 
         shape_dict = {
@@ -50,8 +66,8 @@ class UpscalerTensorrt:
             "output": {"shape": (1, 3, H*4, W*4)},
         }
         # setup engine
-        upscaler_trt_model.activate()
-        upscaler_trt_model.allocate_buffers(shape_dict=shape_dict)
+        engine.activate()
+        engine.allocate_buffers(shape_dict=shape_dict)
 
         cudaStream = torch.cuda.current_stream().cuda_stream
         pbar = ProgressBar(B)
@@ -60,7 +76,7 @@ class UpscalerTensorrt:
         upscaled_frames = torch.empty((B, C, final_height, final_width), dtype=torch.float32, device=mm.intermediate_device()) # offloaded to cpu
 
         for i, img in enumerate(images_list):
-            result = upscaler_trt_model.infer({"input": img}, cudaStream)
+            result = engine.infer({"input": img}, cudaStream)
             result = result["output"]
             if W*4 != final_width or H*4 != final_height:
                 # must resize
@@ -82,7 +98,7 @@ class UpscalerTensorrt:
             pbar.update(1)
 
         output = upscaled_frames.permute(0, 2, 3, 1)
-        upscaler_trt_model.reset() # frees engine vram
+        engine.reset() # frees engine vram
         mm.soft_empty_cache()
 
         logger.info(f"Output shape: {output.shape}")
@@ -103,7 +119,7 @@ class UpscalerTensorrtResize:
                 ),
             },
         }
-    RETURN_NAMES = ("resize",)
+    RETURN_NAMES = ("RESIZE",)
     RETURN_TYPES = ("UPSCALER_TRT_RESIZE",)
     CATEGORY = "TensorRT/Upscaler"
     DESCRIPTION = "Specify a custom width and height for resizing."
@@ -123,7 +139,7 @@ class UpscalerTensorrtResizePreset:
                 ),
             },
         }
-    RETURN_NAMES = ("resize",)
+    RETURN_NAMES = ("RESIZE",)
     RETURN_TYPES = ("UPSCALER_TRT_RESIZE",)
     CATEGORY = "TensorRT/Upscaler"
     DESCRIPTION = "Specify a custom width and height for resizing."
@@ -163,21 +179,21 @@ class LoadUpscalerTensorrtModel:
                 ),
             },
             "optional": {
-                "build_options": (
-                    "UPSCALER_TRTENGINE_OPTIONS",
+                "options": (
+                    "UPSCALER_TRT_ENGINE_OPTIONS",
                     {"tooltip": "Options for building the TensorRT engine"}
                 ),
             }
         }
-    RETURN_NAMES = ("upscaler_trt_model",)
+    RETURN_NAMES = ("engine",)
     RETURN_TYPES = ("UPSCALER_TRT_MODEL",)
     CATEGORY = "TensorRT/Upscaler"
     DESCRIPTION = "Load TensorRT model (the model will be built automatically if not found)"
     FUNCTION = "load_upscaler_tensorrt_model"
 
-    def load_upscaler_tensorrt_model(self, model, precision, build_options=None):
-        if build_options is None:
-            build_options = EngineBuildOptions()
+    def load_upscaler_tensorrt_model(self, model, precision, options=None):
+        if options is None:
+            options = EngineBuildOptions()
 
         tensorrt_models_dir = os.path.join(folder_paths.models_dir, "tensorrt", "upscaler")
         onnx_models_dir = os.path.join(folder_paths.models_dir, "onnx")
@@ -189,9 +205,9 @@ class LoadUpscalerTensorrtModel:
 
         # Engine config, should this power be given to people to decide?
         engine_channel = 3
-        engine_min_batch, engine_opt_batch, engine_max_batch = build_options.batch_min, build_options.batch_opt, build_options.batch_max
-        engine_min_h, engine_opt_h, engine_max_h = build_options.height_min, build_options.height_opt, build_options.height_max
-        engine_min_w, engine_opt_w, engine_max_w = build_options.width_min, build_options.width_opt, build_options.width_max
+        engine_min_batch, engine_opt_batch, engine_max_batch = options.batch_min, options.batch_opt, options.batch_max
+        engine_min_h, engine_opt_h, engine_max_h = options.height_min, options.height_opt, options.height_max
+        engine_min_w, engine_opt_w, engine_max_w = options.width_min, options.width_opt, options.width_max
         tensorrt_model_path = os.path.join(tensorrt_models_dir, f"{model}_{precision}_{engine_min_batch}x{engine_channel}x{engine_min_h}x{engine_min_w}_{engine_opt_batch}x{engine_channel}x{engine_opt_h}x{engine_opt_w}_{engine_max_batch}x{engine_channel}x{engine_max_h}x{engine_max_w}_{tensorrt.__version__}.trt")
 
         # Download onnx & build tensorrt engine
@@ -224,7 +240,7 @@ class LoadUpscalerTensorrtModel:
         engine = Engine(tensorrt_model_path)
         engine.load()
 
-        return (engine,)
+        return ({"engine": engine, "options": options},)
 
 class EngineBuildOptions:
     width_min: int = 256
@@ -283,12 +299,13 @@ class EngineBuildOptionsNode:
         }
 
     RETURN_TYPES = ("UPSCALER_TRT_ENGINE_OPTIONS",)
-    RETURN_NAMES = ("BUILD_OPTIONS",)
+    RETURN_NAMES = ("OPTIONS",)
     CATEGORY = "TensorRT/Upscaler"
     FUNCTION = "package"
 
     @classmethod
     def VALIDATE_INPUTS(cls, input_types):
+        print(input_types)
         if input_types["width_opt"] < input_types["width_min"]:
             return "width_opt must be greater than or equal to width_min"
         if input_types["width_opt"] > input_types["width_max"]:
@@ -318,7 +335,7 @@ class EngineBuildOptionsNode:
 
 
 NODE_CLASS_MAPPINGS = {
-    "UpscalerTensorrt": UpscalerTensorrt,
+    "UpscalerTensorRT": UpscalerTensorRT,
     "UpscalerTensorrtResize": UpscalerTensorrtResize,
     "UpscalerTensorrtResizePreset": UpscalerTensorrtResizePreset,
     "LoadUpscalerTensorrtModel": LoadUpscalerTensorrtModel,
@@ -326,10 +343,10 @@ NODE_CLASS_MAPPINGS = {
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "UpscalerTensorrt": "TensorRT Upscaler ⚡",
+    "UpscalerTensorRT": "TensorRT Upscaler ⚡",
     "UpscalerTensorrtResize": "TensorRT Upscaler Resize",
     "UpscalerTensorrtResizePreset": "TensorRT Upscaler Resize Preset",
-    "LoadUpscalerTensorrtModel": "TensorRT Upscale Model Loader",
+    "LoadUpscalerTensorrtModel": "TensorRT Upscaler Model Loader",
     "EngineBuildOptions": "TensorRT Engine Builder Options",
 }
 
