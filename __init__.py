@@ -96,7 +96,7 @@ class LoadUpscalerTensorrtModel:
             },
             "optional": {
                 "build_options": (
-                    "ENGINE_OPTIONS",
+                    "TRT_UPSCALER_ENGINE_OPTIONS",
                     {"tooltip": "Options for building the TensorRT engine"}
                 ),
             }
@@ -158,7 +158,6 @@ class LoadUpscalerTensorrtModel:
 
         return (engine,)
 
-
 class EngineBuildOptions:
     width_min: int = 256
     width_opt: int = 512
@@ -178,44 +177,44 @@ class EngineBuildOptionsNode:
             "required": {
                 "width_min" : (
                     "INT",
-                    {"default": 256, "min": 1, "max": 4096, "tooltip": "Minimal width the TensorRT engine will accept as input"}
+                    {"default": EngineBuildOptions.width_min, "min": 1, "max": 4096, "tooltip": "Minimal width the TensorRT engine will accept as input"}
                 ),
                 "width_opt" : (
                     "INT",
-                    {"default": 512, "min": 1, "max": 4096, "tooltip": "Optimal width the TensorRT engine will accept as input"}
+                    {"default": EngineBuildOptions.width_opt, "min": 1, "max": 4096, "tooltip": "Optimal width the TensorRT engine will accept as input"}
                 ),
                 "width_max" : (
                     "INT",
-                    {"default": 1280, "min": 1, "max": 4096, "tooltip": "Maximum width the TensorRT engine will accept as input"}
+                    {"default": EngineBuildOptions.width_max, "min": 1, "max": 4096, "tooltip": "Maximum width the TensorRT engine will accept as input"}
                 ),
                 "height_min" : (
                     "INT",
-                    {"default": 256, "min": 1, "max": 4096, "tooltip": "Minimal height the TensorRT engine will accept as input"}
+                    {"default": EngineBuildOptions.height_min, "min": 1, "max": 4096, "tooltip": "Minimal height the TensorRT engine will accept as input"}
                 ),
                 "height_opt" : (
                     "INT",
-                    {"default": 512, "min": 1, "max": 4096, "tooltip": "Optimal height the TensorRT engine will accept as input"}
+                    {"default": EngineBuildOptions.height_opt, "min": 1, "max": 4096, "tooltip": "Optimal height the TensorRT engine will accept as input"}
                 ),
                 "height_max" : (
                     "INT",
-                    {"default": 1280, "min": 1, "max": 4096, "tooltip": "Maximum height the TensorRT engine will accept as input"}
+                    {"default": EngineBuildOptions.height_max, "min": 1, "max": 4096, "tooltip": "Maximum height the TensorRT engine will accept as input"}
                 ),
                 "batch_min" : (
                     "INT",
-                    {"default": 1, "min": 1, "tooltip": "Minimal batch size the TensorRT engine will accept as input"}
+                    {"default": EngineBuildOptions.batch_min, "min": 1, "tooltip": "Minimal batch size the TensorRT engine will accept as input"}
                 ),
                 "batch_opt" : (
                     "INT",
-                    {"default": 1, "min": 1, "tooltip": "Optimal batch size the TensorRT engine will accept as input"}
+                    {"default": EngineBuildOptions.batch_opt, "min": 1, "tooltip": "Optimal batch size the TensorRT engine will accept as input"}
                 ),
                 "batch_max" : (
                     "INT",
-                    {"default": 1, "min": 1, "tooltip": "Maximum batch size the TensorRT engine will accept as input"}
+                    {"default": EngineBuildOptions.batch_max, "min": 1, "tooltip": "Maximum batch size the TensorRT engine will accept as input"}
                 ),
             },
         }
 
-    RETURN_TYPES = ("ENGINE_OPTIONS",)
+    RETURN_TYPES = ("TRT_UPSCALER_ENGINE_OPTIONS",)
     RETURN_NAMES = ("BUILD_OPTIONS",)
     CATEGORY = "TensorRT/Upscaler"
     FUNCTION = "package"
