@@ -108,7 +108,7 @@ class UpscalerTensorRT:
         logger.info(f"Output shape: {output.shape}")
         return (output,)
 
-class UpscalerTensorrtResize:
+class UpscalerTensorRTResize:
     @classmethod
     def INPUT_TYPES(s):
         return {
@@ -132,7 +132,7 @@ class UpscalerTensorrtResize:
     def resize(self, width, height):
         return ({"width": width, "height": height},)
 
-class UpscalerTensorrtResizePreset:
+class UpscalerTensorRTResizePreset:
     @classmethod
     def INPUT_TYPES(s):
         return {
@@ -168,7 +168,7 @@ class UpscalerTensorrtResizePreset:
         return ({"width": width, "height": height},)
 
 
-class LoadUpscalerTensorrtModel:
+class UpscalerTensorRTLoader:
     @classmethod
     def INPUT_TYPES(s):
         return {
@@ -311,37 +311,37 @@ class EngineBuildOptionsNode:
 
     @classmethod
     def VALIDATE_INPUTS(cls, width_min, width_opt, width_max, height_min, height_opt, height_max, batch_min, batch_opt, batch_max):
-        if width_min < 1:
+        if width_min is not None and width_min < 1:
             return "width_min can not be lower than 1"
-        if width_opt < 1:
+        if width_opt is not None and width_opt < 1:
             return "width_opt can not be lower than 1"
-        if width_max < 1:
+        if width_max is not None and width_max < 1:
             return "width_max can not be lower than 1"
-        if width_min > width_opt:
+        if width_min is not None and width_opt is not None and width_min > width_opt:
             return "width_min should not be greater than width_opt"
-        if width_opt > width_max:
+        if width_opt is not None and width_opt is not None and width_opt > width_max:
             return "width_opt should not be greater than width_max"
 
-        if height_min < 1:
+        if height_min is not None and height_min < 1:
             return "height_min can not be lower than 1"
-        if height_opt < 1:
+        if height_opt is not None and height_opt < 1:
             return "height_opt can not be lower than 1"
-        if height_max < 1:
+        if height_max is not None and height_max < 1:
             return "height_max can not be lower than 1"
-        if height_min > height_opt:
+        if height_min is not None and height_opt is not None and height_min > height_opt:
             return "height_min should not be greater than height_opt"
-        if height_opt > height_max:
+        if height_opt is not None and height_max is not None and height_opt > height_max:
             return "height_opt should not be greater than height_max"
 
-        if batch_min < 1:
+        if batch_min is not None and batch_min < 1:
             return "batch_min can not be lower than 1"
-        if batch_opt < 1:
+        if batch_opt is not None and batch_opt < 1:
             return "batch_opt can not be lower than 1"
-        if batch_max < 1:
+        if batch_max is not None and batch_max < 1:
             return "batch_max can not be lower than 1"
-        if batch_min > batch_opt:
+        if batch_min is not None and batch_opt is not None and batch_min > batch_opt:
             return "batch_min should not be greater than batch_opt"
-        if batch_opt > batch_max:
+        if batch_opt is not None and batch_max is not None and batch_opt > batch_max:
             return "batch_opt should not be greater than batch_max"
 
         return True
@@ -362,18 +362,18 @@ class EngineBuildOptionsNode:
 
 NODE_CLASS_MAPPINGS = {
     "UpscalerTensorRT": UpscalerTensorRT,
-    "UpscalerTensorrtResize": UpscalerTensorrtResize,
-    "UpscalerTensorrtResizePreset": UpscalerTensorrtResizePreset,
-    "LoadUpscalerTensorrtModel": LoadUpscalerTensorrtModel,
+    "UpscalerTensorRTResize": UpscalerTensorRTResize,
+    "UpscalerTensorRTResizePreset": UpscalerTensorRTResizePreset,
+    "UpscalerTensorRTLoader": UpscalerTensorRTLoader,
     "EngineBuildOptions": EngineBuildOptionsNode,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "UpscalerTensorRT": "TensorRT Upscaler ⚡",
-    "UpscalerTensorrtResize": "TensorRT Upscaler Resize",
-    "UpscalerTensorrtResizePreset": "TensorRT Upscaler Resize Preset",
-    "LoadUpscalerTensorrtModel": "TensorRT Upscaler Model Loader",
-    "EngineBuildOptions": "TensorRT Engine Builder Options",
+    "UpscalerTensorRT": "TensorRT Upscaler⚡",
+    "UpscalerTensorRTResize": "TensorRT Upscaler Resize",
+    "UpscalerTensorRTResizePreset": "TensorRT Upscaler Resize Preset",
+    "UpscalerTensorRTLoader": "TensorRT Upscaler Loader",
+    "EngineBuildOptions": "TensorRT Engine Loader Options",
 }
 
 __all__ = ['NODE_CLASS_MAPPINGS', 'NODE_DISPLAY_NAME_MAPPINGS']
