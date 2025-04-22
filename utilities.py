@@ -99,35 +99,3 @@ def download_file(url, save_path):
         for data in response.iter_content(chunk_size=1024):
             size = file.write(data)
             progress_bar.update(size)
-
-def get_final_resolutions(width, height, resize_to):
-    final_width = None
-    final_height = None
-    aspect_ratio = float(width/height)
-
-    match resize_to:
-        case "HD":
-            final_width = 1280
-            final_height = 720
-        case "FHD":
-            final_width = 1920
-            final_height = 1080
-        case "2k":
-            final_width = 2560
-            final_height = 1440
-        case "4k":
-            final_width = 3840
-            final_height = 2160
-        case "none":
-            final_width = width*4
-            final_height = height*4
-
-    if aspect_ratio == 1.0:
-        final_width = final_height
-
-    if aspect_ratio < 1.0 and resize_to != "none":
-        temp = final_width
-        final_width = final_height
-        final_height = temp
-
-    return (final_width, final_height)

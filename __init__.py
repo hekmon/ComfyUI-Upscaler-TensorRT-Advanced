@@ -25,9 +25,11 @@ class UpscalerTensorrt:
                     "UPSCALER_TRT_MODEL",
                     {"tooltip": "Tensorrt model built and loaded"}
                 ),
-                "resize_to": (
-                    ["none", "HD", "FHD", "2k", "4k"],
-                    {"tooltip": "Resize the upscaled image to fixed resolutions, optional"}
+            },
+            "optional": {
+                "resize": (
+                    "UPSCALER_TRT_RESIZE",
+                    {"tooltip": "Resize the image after the x4 model upscale"}
                 ),
             }
         }
@@ -37,11 +39,11 @@ class UpscalerTensorrt:
     CATEGORY = "TensorRT/Upscaler"
     DESCRIPTION = "Upscale images with TensorRT"
 
-    def upscaler_tensorrt(self, images, upscaler_trt_model, resize_to):
+    def upscaler_tensorrt(self, images, upscaler_trt_model, resize=None):
         images_bchw = images.permute(0, 3, 1, 2)
         B, C, H, W = images_bchw.shape
-        final_width, final_height = get_final_resolutions(W, H, resize_to)
-        logger.info(f"Upscaling {B} images from H:{H}, W:{W} to H:{H*4}, W:{W*4} | Final resolution: H:{final_height}, W:{final_width} | resize_to: {resize_to}")
+        final_width, final_height = W*4, H*4 if resize is None else resize["width"], resize["height"]
+        logger.info(f"Upscaling {B} images from H:{H}, W:{W} to H:{H*4}, W:{W*4} | Final resolution: H:{final_height}, W:{final_width}")
 
         shape_dict = {
             "input": {"shape": (1, 3, H, W)},
@@ -56,18 +58,25 @@ class UpscalerTensorrt:
         images_list = list(torch.split(images_bchw, split_size_or_sections=1))
 
         upscaled_frames = torch.empty((B, C, final_height, final_width), dtype=torch.float32, device=mm.intermediate_device()) # offloaded to cpu
-        must_resize = W*4 != final_width or H*4 != final_height
 
         for i, img in enumerate(images_list):
             result = upscaler_trt_model.infer({"input": img}, cudaStream)
             result = result["output"]
-
-            if must_resize:
+            if W*4 != final_width or H*4 != final_height:
+                # must resize
+                if W*4 > final_width or H*4 > final_height:
+                    # downscale, let's use the specialized area mode
+                    mode='area'
+                    antialias=False # not compatible/needed for downscaling
+                else:
+                    # upscale, let's use bicubic
+                    mode='bicubic'
+                    antialias=True # needed for quality upscaling
                 result = torch.nn.functional.interpolate(
                     result,
                     size=(final_height, final_width),
-                    mode='bicubic',
-                    antialias=True
+                    mode=mode,
+                    antialias=antialias
                 )
             upscaled_frames[i] = result.to(mm.intermediate_device())
             pbar.update(1)
@@ -78,6 +87,65 @@ class UpscalerTensorrt:
 
         logger.info(f"Output shape: {output.shape}")
         return (output,)
+
+class UpscalerTensorrtResize:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "width": (
+                    "INT",
+                    {"default": 1920, "min": 1}
+                ),
+                "height": (
+                    "INT",
+                    {"default": 1080, "min": 1}
+                ),
+            },
+        }
+    RETURN_NAMES = ("resize",)
+    RETURN_TYPES = ("UPSCALER_TRT_RESIZE",)
+    CATEGORY = "TensorRT/Upscaler"
+    DESCRIPTION = "Specify a custom width and height for resizing."
+    FUNCTION = "resize"
+
+    def resize(self, width, height):
+        return ({"width": width, "height": height})
+
+class UpscalerTensorrtResizePreset:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "resolution": (
+                    ["HD", "FullHD", "2K", "4K"],
+                    {"default": "FullHD", "tooltip": "HD: 1280x720, FullHD: 1920x1080, 2K: 2560x1440, 4K: 3840x2160"}
+                ),
+            },
+        }
+    RETURN_NAMES = ("resize",)
+    RETURN_TYPES = ("UPSCALER_TRT_RESIZE",)
+    CATEGORY = "TensorRT/Upscaler"
+    DESCRIPTION = "Specify a custom width and height for resizing."
+    FUNCTION = "resize"
+
+    def resize(self, resolution):
+        match resolution:
+            case "HD":
+                width = 1280
+                height = 720
+            case "FullHD":
+                width = 1920
+                height = 1080
+            case "2K":
+                width = 2560
+                height = 1440
+            case "4K":
+                width = 3840
+                height = 2160
+            case _:
+                raise ValueError("Invalid resolution specified")
+        return ({"width": width, "height": height})
 
 
 class LoadUpscalerTensorrtModel:
@@ -96,7 +164,7 @@ class LoadUpscalerTensorrtModel:
             },
             "optional": {
                 "build_options": (
-                    "TRT_UPSCALER_ENGINE_OPTIONS",
+                    "UPSCALER_TRTENGINE_OPTIONS",
                     {"tooltip": "Options for building the TensorRT engine"}
                 ),
             }
@@ -214,7 +282,7 @@ class EngineBuildOptionsNode:
             },
         }
 
-    RETURN_TYPES = ("TRT_UPSCALER_ENGINE_OPTIONS",)
+    RETURN_TYPES = ("UPSCALER_TRT_ENGINE_OPTIONS",)
     RETURN_NAMES = ("BUILD_OPTIONS",)
     CATEGORY = "TensorRT/Upscaler"
     FUNCTION = "package"
@@ -251,12 +319,16 @@ class EngineBuildOptionsNode:
 
 NODE_CLASS_MAPPINGS = {
     "UpscalerTensorrt": UpscalerTensorrt,
+    "UpscalerTensorrtResize": UpscalerTensorrtResize,
+    "UpscalerTensorrtResizePreset": UpscalerTensorrtResizePreset,
     "LoadUpscalerTensorrtModel": LoadUpscalerTensorrtModel,
     "EngineBuildOptions": EngineBuildOptionsNode,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
     "UpscalerTensorrt": "TensorRT Upscaler ⚡",
+    "UpscalerTensorrtResize": "TensorRT Upscaler Resize",
+    "UpscalerTensorrtResizePreset": "TensorRT Upscaler Resize Preset",
     "LoadUpscalerTensorrtModel": "TensorRT Upscale Model Loader",
     "EngineBuildOptions": "TensorRT Engine Builder Options",
 }
