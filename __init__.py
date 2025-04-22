@@ -80,7 +80,7 @@ class UpscalerTensorRT:
             result = result["output"]
             if W*4 != final_width or H*4 != final_height:
                 # must resize
-                if W*4 > final_width or H*4 > final_height:
+                if W*4 > final_width and H*4 > final_height:
                     # downscale, let's use the specialized area mode
                     mode='area'
                     antialias=False # not compatible/needed for downscaling
@@ -126,7 +126,7 @@ class UpscalerTensorrtResize:
     FUNCTION = "resize"
 
     def resize(self, width, height):
-        return ({"width": width, "height": height})
+        return ({"width": width, "height": height},)
 
 class UpscalerTensorrtResizePreset:
     @classmethod
@@ -161,7 +161,7 @@ class UpscalerTensorrtResizePreset:
                 height = 2160
             case _:
                 raise ValueError("Invalid resolution specified")
-        return ({"width": width, "height": height})
+        return ({"width": width, "height": height},)
 
 
 class LoadUpscalerTensorrtModel:
@@ -305,7 +305,6 @@ class EngineBuildOptionsNode:
 
     @classmethod
     def VALIDATE_INPUTS(cls, input_types):
-        print(input_types)
         if input_types["width_opt"] < input_types["width_min"]:
             return "width_opt must be greater than or equal to width_min"
         if input_types["width_opt"] > input_types["width_max"]:
