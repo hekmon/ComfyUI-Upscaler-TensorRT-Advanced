@@ -309,6 +309,39 @@ class EngineBuildOptionsNode:
 
     @classmethod
     def VALIDATE_INPUTS(cls, width_min, width_opt, width_max, height_min, height_opt, height_max, batch_min, batch_opt, batch_max):
+        if width_min < 1:
+            return "width_min can not be lower than 1"
+        if width_opt < 1:
+            return "width_opt can not be lower than 1"
+        if width_max < 1:
+            return "width_max can not be lower than 1"
+        if width_min > width_opt:
+            return "width_min should not be greater than width_opt"
+        if width_opt > width_max:
+            return "width_opt should not be greater than width_max"
+
+        if height_min < 1:
+            return "height_min can not be lower than 1"
+        if height_opt < 1:
+            return "height_opt can not be lower than 1"
+        if height_max < 1:
+            return "height_max can not be lower than 1"
+        if height_min > height_opt:
+            return "height_min should not be greater than height_opt"
+        if height_opt > height_max:
+            return "height_opt should not be greater than height_max"
+
+        if batch_min < 1:
+            return "batch_min can not be lower than 1"
+        if batch_opt < 1:
+            return "batch_opt can not be lower than 1"
+        if batch_max < 1:
+            return "batch_max can not be lower than 1"
+        if batch_min > batch_opt:
+            return "batch_min should not be greater than batch_opt"
+        if batch_opt > batch_max:
+            return "batch_opt should not be greater than batch_max"
+
         return True
 
     def package(self, width_min, width_opt, width_max, height_min, height_opt, height_max, batch_min, batch_opt, batch_max):
