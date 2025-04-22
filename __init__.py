@@ -228,13 +228,15 @@ class LoadUpscalerTensorrtModel:
             mm.soft_empty_cache()
             s = time.time()
             engine = Engine(tensorrt_model_path)
-            engine.build(
+            result = engine.build(
                 onnx_path=onnx_model_path,
                 fp16= True if precision == "fp16" else False, # mixed precision not working TODO: investigate
                 input_profile=[
                     {"input": [(engine_min_batch,engine_channel,engine_min_h,engine_min_w), (engine_opt_batch,engine_channel,engine_opt_h,engine_min_w), (engine_max_batch,engine_channel,engine_max_h,engine_max_w)]}, # any sizes from 256x256 to 1280x1280
                 ],
             )
+            if result != 0:
+                raise Exception("Failed to build the engine. Please check the console.")
             e = time.time()
             logger.info(f"Time taken to build: {(e-s)} seconds")
 
