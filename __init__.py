@@ -16,15 +16,24 @@ class UpscalerTensorrt:
     def INPUT_TYPES(s):
         return {
             "required": {
-                "images": ("IMAGE", {"tooltip": "Images to be upscaled. Resolution must be between 256 and 1280 px"}),
-                "upscaler_trt_model": ("UPSCALER_TRT_MODEL", {"tooltip": "Tensorrt model built and loaded"}),
-                "resize_to": (["none", "HD", "FHD", "2k", "4k"],{"tooltip": "Resize the upscaled image to fixed resolutions, optional"}),
+                "images": (
+                    "IMAGE",
+                    {"tooltip": "Images to be upscaled. Resolution must be between 256 and 1280 px"}
+                ),
+                "upscaler_trt_model": (
+                    "UPSCALER_TRT_MODEL",
+                    {"tooltip": "Tensorrt model built and loaded"}
+                ),
+                "resize_to": (
+                    ["none", "HD", "FHD", "2k", "4k"],
+                    {"tooltip": "Resize the upscaled image to fixed resolutions, optional"}
+                ),
             }
         }
     RETURN_NAMES = ("IMAGE",)
     RETURN_TYPES = ("IMAGE",)
     FUNCTION = "upscaler_tensorrt"
-    CATEGORY = "tensorrt"
+    CATEGORY = "TensorRT/Upscaler"
     DESCRIPTION = "Upscale images with tensorrt"
 
     def upscaler_tensorrt(self, images, upscaler_trt_model, resize_to):
@@ -54,7 +63,7 @@ class UpscalerTensorrt:
 
             if must_resize:
                 result = torch.nn.functional.interpolate(
-                    result, 
+                    result,
                     size=(final_height, final_width),
                     mode='bicubic',
                     antialias=True
@@ -74,14 +83,20 @@ class LoadUpscalerTensorrtModel:
     def INPUT_TYPES(s):
         return {
             "required": {
-                "model": (["4x-AnimeSharp", "4x-UltraSharp", "4x-WTP-UDS-Esrgan", "4x_NMKD-Siax_200k", "4x_RealisticRescaler_100000_G", "4x_foolhardy_Remacri", "RealESRGAN_x4", "4xNomos2_otf_esrgan"], {"default": "4x-UltraSharp", "tooltip": "These models have been tested with tensorrt"}),
-                "precision": (["fp16", "fp32"], {"default": "fp16", "tooltip": "Precision to build the tensorrt engines"}),
+                "model": (
+                    ["4x-AnimeSharp", "4x-UltraSharp", "4x-WTP-UDS-Esrgan", "4x_NMKD-Siax_200k", "4x_RealisticRescaler_100000_G", "4x_foolhardy_Remacri", "RealESRGAN_x4", "4xNomos2_otf_esrgan"],
+                    {"default": "4x-UltraSharp", "tooltip": "These models have been tested with tensorrt"}
+                ),
+                "precision": (
+                    ["fp16", "fp32"],
+                    {"default": "fp16", "tooltip": "Precision to build the tensorrt engines"}
+                ),
             }
         }
     RETURN_NAMES = ("upscaler_trt_model",)
     RETURN_TYPES = ("UPSCALER_TRT_MODEL",)
-    CATEGORY = "tensorrt"
-    DESCRIPTION = "Load tensorrt models, they will be built automatically if not found."
+    CATEGORY = "TensorRT/Upscaler"
+    DESCRIPTION = "Load tensorrt model (the model will be built automatically if not found)"
     FUNCTION = "load_upscaler_tensorrt_model"
 
     def load_upscaler_tensorrt_model(self, model, precision):
@@ -138,8 +153,8 @@ NODE_CLASS_MAPPINGS = {
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "UpscalerTensorrt": "Upscaler Tensorrt ⚡",
-    "LoadUpscalerTensorrtModel": "Load Upscale Tensorrt Model",
+    "UpscalerTensorrt": "TensorRT Upscaler ⚡",
+    "LoadUpscalerTensorrtModel": "TensorRT Upscale Model Loader",
 }
 
 __all__ = ['NODE_CLASS_MAPPINGS', 'NODE_DISPLAY_NAME_MAPPINGS']
