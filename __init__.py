@@ -80,11 +80,10 @@ class LoadUpscalerTensorrtModel:
         }
     RETURN_NAMES = ("upscaler_trt_model",)
     RETURN_TYPES = ("UPSCALER_TRT_MODEL",)
-    FUNCTION = "main"
     CATEGORY = "tensorrt"
     DESCRIPTION = "Load tensorrt models, they will be built automatically if not found."
     FUNCTION = "load_upscaler_tensorrt_model"
-    
+
     def load_upscaler_tensorrt_model(self, model, precision):
         tensorrt_models_dir = os.path.join(folder_paths.models_dir, "tensorrt", "upscaler")
         onnx_models_dir = os.path.join(folder_paths.models_dir, "onnx")
@@ -93,7 +92,7 @@ class LoadUpscalerTensorrtModel:
         os.makedirs(onnx_models_dir, exist_ok=True)
 
         onnx_model_path = os.path.join(onnx_models_dir, f"{model}.onnx")
-        
+
         # Engine config, should this power be given to people to decide?
         engine_channel = 3
         engine_min_batch, engine_opt_batch, engine_max_batch = 1, 1, 1

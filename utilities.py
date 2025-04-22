@@ -25,37 +25,37 @@ class ColoredLogger:
         self.logger = logging.getLogger(name)
         self.logger.setLevel(logging.DEBUG)
         self.app_name = name
-        
+
         # Prevent message propagation to parent loggers
         self.logger.propagate = False
-        
+
         # Clear existing handlers
         self.logger.handlers = []
-        
+
         # Create console handler
         handler = logging.StreamHandler(sys.stdout)
         handler.setLevel(logging.DEBUG)
-        
+
         # Custom formatter class to handle colored components
         class ColoredFormatter(logging.Formatter):
             def format(self, record):
                 # Color the level name according to severity
                 level_color = ColoredLogger.LEVEL_COLORS.get(record.levelname, '')
                 colored_levelname = f"{level_color}{record.levelname}{ColoredLogger.COLORS['RESET']}"
-                
+
                 # Color the logger name in blue
                 colored_name = f"{ColoredLogger.COLORS['BLUE']}{record.name}{ColoredLogger.COLORS['RESET']}"
-                
+
                 # Set the colored components
                 record.levelname = colored_levelname
                 record.name = colored_name
-                
+
                 return super().format(record)
-        
+
         # Create formatter with the new format
         formatter = ColoredFormatter('[%(name)s|%(levelname)s] - %(message)s')
         handler.setFormatter(formatter)
-        
+
         self.logger.addHandler(handler)
 
 
@@ -77,7 +77,7 @@ class ColoredLogger:
 def download_file(url, save_path):
     """
     Download a file from URL with progress bar
-    
+
     Args:
         url (str): URL of the file to download
         save_path (str): Path to save the file as
@@ -86,7 +86,7 @@ def download_file(url, save_path):
     RESET = '\033[0m'
     response = requests.get(url, stream=True)
     total_size = int(response.headers.get('content-length', 0))
-    
+
     with open(save_path, 'wb') as file, tqdm(
         desc=save_path,
         total=total_size,

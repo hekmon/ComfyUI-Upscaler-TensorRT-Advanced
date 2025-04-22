@@ -22,7 +22,7 @@ def export_trt(trt_path=None, onnx_path=None, use_fp16=True):
     # Check if trt_dir already exists as a directory
     if not os.path.exists(trt_dir):
         os.makedirs(trt_dir)
-        
+
     #os.makedirs(trt_dir, exist_ok=True)
     total_files = len(onnx_files)
     for index, onnx_path in enumerate(onnx_files):
