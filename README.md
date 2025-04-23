@@ -7,15 +7,15 @@
 
 ## Overview
 
-This project is a fork of the original [ComfyUI-Upscaler-Tensorrt](https://github.com/yuvraj108c/ComfyUI-Upscaler-Tensorrt) by [yuvraj108c](https://github.com/yuvraj108c). The idea behind this fork is to provide users with control over previously constant or hidden parameters during the engine building process, such as adjusting the minimum and maximum input sizes, or modifying the post-upscale resize settings.
+This project is a fork of the original [ComfyUI-Upscaler-Tensorrt](https://github.com/yuvraj108c/ComfyUI-Upscaler-Tensorrt) by [yuvraj108c](https://github.com/yuvraj108c). The idea behind this fork is to provide users with control over previously constant or hidden parameters during the engine building process, such as adjusting the minimum, maximum input sizes, or modifying the post-upscale resize settings.
 
 ## Features
 
 The fork can work on par with the original project, and the user is encouraged to first read the original project [README](https://github.com/yuvraj108c/ComfyUI-Upscaler-Tensorrt?tab=readme-ov-file).
 
 - **Advanced Engine Build Options**: Users can fine-tune various parameters during the TensorRT engine building process, such as minimum, optimal, maximum width and height and batch size. *This allows to exceed the original 1280x1280 px resolution limit of the original project.*
-- **Custom Resize Options**: Users can specify custom resize dimensions for their images.
-- **Better Error Handling**: Improved error integration to ComfyUI and more checks to prevent worfklows from being stuck and the user being force to investigate the console.
+- **Custom Resize Options**: Users can specify custom resize dimensions for the post upscale step.
+- **Better Error Handling**: Improved error integration to ComfyUI and more checks to prevent worfklows from being stuck on non handled errors.
 
 ## Examples
 
