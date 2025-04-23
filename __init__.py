@@ -217,7 +217,7 @@ class LoaderNode:
         # Download onnx & build tensorrt engine
         if not os.path.exists(tensorrt_model_path):
             if not os.path.exists(onnx_model_path):
-                onnx_model_download_url = f"https://huggingface.co/yuvraj108c/ComfyUI-Upscaler-Onnx/resolve/main/{model}.onnx"
+                onnx_model_download_url = f"https://huggingface.co/hekmon/ComfyUI-Upscaler-Onnx/resolve/main/{model}.onnx"
                 logger.info(f"Downloading {onnx_model_download_url}")
                 download_file(url=onnx_model_download_url, save_path=onnx_model_path)
             else:
