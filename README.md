@@ -7,7 +7,7 @@
 
 ## Overview
 
-This project is a fork of the original [ComfyUI-Upscaler-Tensorrt](https://github.com/yuvraj108c/ComfyUI-Upscaler-Tensorrt) by [yuvraj108c](https://github.com/yuvraj108c). The idea behind this fork is to allow the user to allow the user to have control on previously constant/hidden parameters during engine building process (change the minimum and maximum input size for example) or the post upscale resize.
+This project is a fork of the original [ComfyUI-Upscaler-Tensorrt](https://github.com/yuvraj108c/ComfyUI-Upscaler-Tensorrt) by [yuvraj108c](https://github.com/yuvraj108c). The idea behind this fork is to provide users with control over previously constant or hidden parameters during the engine building process, such as adjusting the minimum and maximum input sizes, or modifying the post-upscale resize settings.
 
 ## Features
 
