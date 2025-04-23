@@ -33,7 +33,7 @@ But the fork also allows you to customize the resize dimensions and engine build
 
 ## Installation
 
-## ComfyUI Manager
+### ComfyUI Manager
 
 This project has been submitted to the ComfyUI Manager registry yet. But you can still install it this way:
 
@@ -44,7 +44,7 @@ This project has been submitted to the ComfyUI Manager registry yet. But you can
 5. Click "Confirm".
 6. Restart ComfyUI.
 
-## Manual
+### Manual
 
 1. On the github page, click on the green `<> Code` button and then "Download ZIP".
 2. Extract the root folder within the downloaded ZIP file to your ComfyUI `custom_nodes` directory.
