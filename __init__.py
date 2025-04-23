@@ -9,10 +9,10 @@ import comfy.model_management as mm
 import time
 import tensorrt
 
-logger = ColoredLogger("ComfyUI-Upscaler-Tensorrt")
+logger = ColoredLogger("ComfyUI-Upscaler-TensorRT-Advanced")
 
 
-class UpscalerTensorRT:
+class UpscalerNode:
     @classmethod
     def INPUT_TYPES(s):
         return {
@@ -108,7 +108,7 @@ class UpscalerTensorRT:
         logger.info(f"Output shape: {output.shape}")
         return (output,)
 
-class UpscalerTensorRTResize:
+class ResizeNode:
     @classmethod
     def INPUT_TYPES(s):
         return {
@@ -132,7 +132,7 @@ class UpscalerTensorRTResize:
     def resize(self, width, height):
         return ({"width": width, "height": height},)
 
-class UpscalerTensorRTResizePreset:
+class ResizePresetNode:
     @classmethod
     def INPUT_TYPES(s):
         return {
@@ -168,7 +168,7 @@ class UpscalerTensorRTResizePreset:
         return ({"width": width, "height": height},)
 
 
-class UpscalerTensorRTLoader:
+class LoaderNode:
     @classmethod
     def INPUT_TYPES(s):
         return {
@@ -361,11 +361,11 @@ class EngineBuildOptionsNode:
 
 
 NODE_CLASS_MAPPINGS = {
-    "UpscalerTensorRT": UpscalerTensorRT,
-    "UpscalerTensorRTResize": UpscalerTensorRTResize,
-    "UpscalerTensorRTResizePreset": UpscalerTensorRTResizePreset,
-    "UpscalerTensorRTLoader": UpscalerTensorRTLoader,
-    "EngineBuildOptions": EngineBuildOptionsNode,
+    "UpscalerTensorRT": UpscalerNode,
+    "UpscalerTensorRTResize": ResizeNode,
+    "UpscalerTensorRTResizePreset": ResizePresetNode,
+    "UpscalerTensorRTLoader": LoaderNode,
+    "UpscalerTensorRTEngineBuildOptions": EngineBuildOptionsNode,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -373,7 +373,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "UpscalerTensorRTResize": "TensorRT Upscaler Resize",
     "UpscalerTensorRTResizePreset": "TensorRT Upscaler Resize Preset",
     "UpscalerTensorRTLoader": "TensorRT Upscaler Loader",
-    "EngineBuildOptions": "TensorRT Engine Loader Options",
+    "UpscalerTensorRTEngineBuildOptions": "TensorRT Upscaler Engine Build Options",
 }
 
 __all__ = ['NODE_CLASS_MAPPINGS', 'NODE_DISPLAY_NAME_MAPPINGS']
