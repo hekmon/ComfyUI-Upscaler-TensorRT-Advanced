@@ -33,4 +33,20 @@ But the fork also allows you to customize the resize dimensions and engine build
 
 ## Installation
 
-TODO
+## ComfyUI Manager
+
+This project has been submitted to the ComfyUI Manager registry yet. But you can still install it this way:
+
+1. Open ComfyUI Manager.
+2. Click the `Custom Nodes Manager` to open the custom nodes manager page.
+3. On the bottom right corner, click the `Install via Git URL` button.
+4. Enter the URL of this repository: `https://github.com/hekmon/ComfyUI-Upscaler-TensorRT-Advanced.git`.
+5. Click "Confirm".
+6. Restart ComfyUI.
+
+## Manual
+
+1. On the github page, click on the green `<> Code` button and then "Download ZIP".
+2. Extract the root folder within the downloaded ZIP file to your ComfyUI `custom_nodes` directory.
+3. Using the same python environment that runs ComfyUI, install the required dependencies: `python -m pip install -r custom_nodes/ComfyUI-Upscaler-TensorRT-Advanced/requirements.txt`.
+4. Restart ComfyUI.
