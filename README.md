@@ -35,7 +35,7 @@ But the fork also allows you to customize the resize dimensions and engine build
 
 ### ComfyUI Manager
 
-This project has been submitted to the ComfyUI Manager registry yet. But you can still install it this way:
+This project has not been submitted to the ComfyUI Manager registry yet. But you can still install it this way:
 
 1. Open ComfyUI Manager.
 2. Click the `Custom Nodes Manager` to open the custom nodes manager page.
