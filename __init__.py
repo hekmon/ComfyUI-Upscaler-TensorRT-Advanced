@@ -22,7 +22,7 @@ class UpscalerNode:
                     {"tooltip": "Images to be upscaled. Resolution must be between 256 and 1280 px if no build options has been specified."}
                 ),
                 "engine": (
-                    "UPSCALER_TRT_MODEL",
+                    "UPSCALER_TRT_ENGINE_PKG",
                     {"tooltip": "TensorRT engine built and loaded"}
                 ),
             },
@@ -190,7 +190,7 @@ class LoaderNode:
             }
         }
     RETURN_NAMES = ("ENGINE",)
-    RETURN_TYPES = ("UPSCALER_TRT_MODEL",)
+    RETURN_TYPES = ("UPSCALER_TRT_ENGINE_PKG",)
     CATEGORY = "TensorRT/Upscaler"
     DESCRIPTION = "Load TensorRT model (the model will be built automatically if not found)"
     FUNCTION = "load_upscaler_tensorrt_model"
