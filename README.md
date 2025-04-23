@@ -1,4 +1,4 @@
-# ComfyUI Upscaler TensorRT Advanced ⚡
+# ComfyUI Upscaler TensorRT Advanced⚡
 
 [![python](https://img.shields.io/badge/python-3.12.9-green)](https://www.python.org/downloads/release/python-31012/)
 [![cuda](https://img.shields.io/badge/cuda-12.8-green)](https://developer.nvidia.com/cuda-downloads)
