@@ -369,11 +369,11 @@ NODE_CLASS_MAPPINGS = {
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "UpscalerTensorRT": "TensorRT Upscaler⚡",
-    "UpscalerTensorRTResize": "TensorRT Upscaler Resize",
-    "UpscalerTensorRTResizePreset": "TensorRT Upscaler Resize Preset",
-    "UpscalerTensorRTLoader": "TensorRT Upscaler Loader",
-    "UpscalerTensorRTEngineBuildOptions": "TensorRT Upscaler Engine Build Options",
+    "UpscalerTensorRT": "Upscaler⚡",
+    "UpscalerTensorRTResize": "Resize Custom",
+    "UpscalerTensorRTResizePreset": "Resize Preset",
+    "UpscalerTensorRTLoader": "Loader",
+    "UpscalerTensorRTEngineBuildOptions": "Engine Build Options",
 }
 
 __all__ = ['NODE_CLASS_MAPPINGS', 'NODE_DISPLAY_NAME_MAPPINGS']
